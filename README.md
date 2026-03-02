@@ -1,4 +1,7 @@
 # RiScVTeX — RISC-V Documentation Suite
+*by Conde Lucento, 2026*
+
+---
 
 **RiScVTeX** es un paquete de LaTeX diseñado para la documentación profesional de arquitectura de computadores, específicamente para el ISA RISC-V. Permite generar listados de código con resaltado de sintaxis, mapas de memoria dinámicos y diagramas de flujo de instrucciones con una estética técnica y moderna.
 
