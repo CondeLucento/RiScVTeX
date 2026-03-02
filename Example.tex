@@ -1,0 +1,74 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{RiScVTeX} % !!!
+
+\begin{document}
+
+\begin{center}
+    \Huge \RiScVTeX \\ \par \vspace{2mm}
+     \normalsize Conde Lucento, 2026 \par \vspace{4mm}
+    \large \textit{The Professional RISC-V Documentation Suite}
+\end{center}
+
+\listofcodes 
+\par
+\vspace{4mm}
+\hrule
+\par
+\vspace{4mm}
+\risctitle{1. Tipografía y Branding}
+El comando principal de identidad es \RiScVTeX. Se puede usar en mitad de una frase y mantiene el espaciado correcto gracias a \texttt{xspace}. 
+
+\subrisctitle{Inline Commands}
+Podemos referenciar registros con la función \(\backslash\)reg como \reg{a0} o \reg{t1} manteniendo la coherencia de color. También es posible definir rangos de bits con la función \(\backslash\)bits para manuales ISA: la instrucción \texttt{jal} utiliza el rango de bits \bits{31:12}.
+
+\risctitle{2. Programación en Ensamblador}
+A continuación, un ejemplo de código con título, numeración y resaltado de sintaxis:
+
+\begin{riscv}[Rutina de Suma Vectorial]
+.data
+    vector: .word 1, 2, 3, 4 # Definicion de datos
+.text
+.globl main
+main:
+    la   t0, vector     # Carga direccion base
+    lw   t1, 0(t0)      # t1 = vector[0]
+    addi t1, t1, 10     # Sumar inmediato
+    sw   t1, 4(t0)      # Guardar en vector[1]
+    
+    # Bucle de control
+    li   t2, 0          # Contador
+loop:
+    beq  t2, a0, end    # Si t2 == a0, salir
+    addi t2, t2, 1      # Incrementar
+    j    loop
+end:
+    ret
+\end{riscv}
+
+\riscwarn{Cuidado con las dependencias de datos (\textit{Data Hazards}) tras un \texttt{lw}. Es recomendable insertar un \texttt{nop} o reordenar el código.}
+\newpage 
+
+\risctitle{3. Análisis de Pipeline}
+El flujo de una instrucción a través de las etapas del procesador se puede representar así:
+\begin{center}
+    IF \riscvstep ID \riscvstep EX \riscvstep MEM \riscvstep WB
+\end{center}
+
+\risctitle{4. Mapa de Memoria (Stack)}
+El entorno \texttt{riscvstack} permite visualizar la pila de forma técnica y limpia:
+
+\begin{riscvstack}[Estado de la Pila en la llamada a Función]
+    \riscvmem{0x7ffffffc}{0x00000001}{Variable $x$}%
+    \riscvmem{0x7ffffff8}{0x00400560}{Dirección de Retorno \reg{ra}}%
+    \riscvmem{0x7ffffff4}{0x7ffffffc}{Frame Pointer \reg{s0} \riscvsp}%
+    \riscvmem{0x7ffffff0}{0xDEADBEEF}{Dato basura}%
+\end{riscvstack}
+
+\subrisctitle{Notas de implementación}
+El paquete \RiScVTeX utiliza \texttt{tabularx} para asegurar que el mapa de memoria ocupe todo el ancho disponible, manteniendo el contenido centrado y resaltado con el color de fondo definido.
+
+\end{document}

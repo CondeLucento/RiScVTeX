@@ -1,0 +1,204 @@
+% RiScVTeX – LaTeX package for RISC-V
+% Copyright (c) 2026 Conde Lucento
+% Licensed under the MIT License
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{RiScVTeX}[2026/03/02 Paquete para código RISC-V]
+
+\RequirePackage{xcolor}
+\RequirePackage{listings}
+\RequirePackage[hidelinks]{hyperref}
+\RequirePackage{xparse}
+\RequirePackage{array}
+\RequirePackage{xspace}
+
+%%%%%%%%%%%% TÍTULO %%%%%%%%%%%%%%%
+\newcommand{\risctitle}[1]{%
+  \vspace{1em}
+  \noindent
+  \colorbox{black}{%
+    \parbox{\dimexpr\linewidth-2\fboxsep}{%
+      \ttfamily\bfseries\Large\color{white}\strut #1\strut
+    }%
+  }%
+  \vspace{0.5em}
+}
+
+%%%%%%%%%%%% SUBTÍTULO %%%%%%%%%%%%%%%
+\newcommand{\subrisctitle}[1]{%
+  \vspace{0.7em}
+  \noindent
+  \colorbox{black}{%
+    \parbox{\dimexpr\linewidth-2\fboxsep}{%
+      \ttfamily\bfseries\normalsize\color{white}\strut #1\strut
+    }%
+  }%
+  \vspace{0.4em}
+}
+
+%%%%%%%%%%%% COLORES %%%%%%%%%%%%%%%
+\definecolor{riscInstruction}{RGB}{0,0,180}
+\definecolor{riscComment}{RGB}{0,120,0}
+\definecolor{riscRegister}{RGB}{180,0,0}
+\definecolor{riscBackground}{RGB}{245,245,245}
+\definecolor{riscPink}{RGB}{255, 0, 198}
+
+%%%%%%%%%%%% DEFINICIÓN LENGUAJE RISCV %%%%%%%%%%%%%%%
+\lstdefinelanguage{RISCV}{
+    morekeywords={
+        add, addi, sub, sll, slli, srl, srli, sra, srai,
+        and, andi, or, ori, xor, xori, slt, slti, sltu, sltui,
+        lw, lh, lb, lhu, lbu, sw, sh, sb, beq, bne, blt, bge, 
+        bltu, bgeu, jal, jalr, lui, auipc, ecall, ebreak,
+        beqz, bnez, blez, bgez, bltz, bgtz, bgt, ble, bgtu, bleu,
+        not, neg, negw, seqz, snez, sltz, sgtz, li, la,
+        mv, j, jr, ret, nop, call, tail
+    },
+    morekeywords=[2]{
+        x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10,
+        x11, x12, x13, x14, x15, x16, x17, x18, x19, x20,
+        x21, x22, x23, x24, x25, x26, x27, x28, x29, x30,
+        x31, a0, a1, a2, a3, a4, a5, a6, a7, ra, sp, gp,
+        tp, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11,
+        t3, t4, t5, t6, t2, t1, t0
+    },
+    morekeywords=[3]{
+        .data, .text, .globl, .section,
+        .word, .byte, .half, .asciz, .ascii, .align, .space
+    },
+    keywordstyle=\color{riscInstruction}\bfseries,
+    keywordstyle=[2]\color{riscRegister},
+    keywordstyle=[3]\color{riscPink},
+    morecomment=[l]{\#},
+    sensitive=true,
+    alsoletter={.}
+}
+
+%%%%%%%%%%%% ESTILO %%%%%%%%%%%%%%%
+\lstdefinestyle{RiScVTeXStyle}{
+  language=RISCV,
+  backgroundcolor=\color{riscBackground},
+  basicstyle=\ttfamily\small,
+  commentstyle=\color{riscComment},
+  numbers=left,
+  numberstyle=\tiny,
+  breaklines=true,
+  showstringspaces=false
+}
+
+%%%%%%%%%%%% CONTADOR Y CODE INDEX %%%%%%%%%%%%%%%
+\newcounter{risccode}
+\renewcommand{\therisccode}{\arabic{risccode}}
+
+\makeatletter
+\newcommand{\listofcodes}{%
+  \section*{Code Index}
+  \addcontentsline{toc}{section}{Code Index}
+  \@starttoc{cod}
+}
+
+\newcommand{\l@risccode}{%
+  \@dottedtocline{1}{1.5em}{2.3em}
+}
+
+\newcommand{\addtocodindex}[1]{%
+  \refstepcounter{risccode}%
+  \addcontentsline{cod}{risccode}{\protect\numberline{\therisccode}#1}%
+}
+\makeatother
+
+%%%%%%%%%%%% ENTORNO BASE %%%%%%%%%%%%%%%
+\lstnewenvironment{riscv}
+{
+  \lstset{style=RiScVTeXStyle}
+}
+{}
+
+%%%%%%%%%%%% ENTORNO CON TÍTULO OPCIONAL %%%%%%%%%%%%%%%
+\let\oldriscv\riscv
+\let\endoldriscv\endriscv
+
+\RenewDocumentEnvironment{riscv}{o}
+{
+  \lstset{style=RiScVTeXStyle}
+  \IfValueT{#1}{
+    \addtocodindex{#1} %
+    \vspace{1em}
+    \noindent
+    \colorbox{black}{%
+      \parbox{\dimexpr\linewidth-2\fboxsep}{%
+        \ttfamily\bfseries\Large\color{white}\strut #1\strut
+      }%
+    }
+    \vspace{0.5em}
+  }
+  \oldriscv
+}
+{
+  \endoldriscv
+}
+
+%%%%%%%%%%%% MAPA DE MEMORIA (ESTRUCTURA FIJA) %%%%%%%%%%%%%%%
+\RequirePackage{tabularx}
+\RequirePackage{array}
+
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+
+%
+\newcommand{\riscvmem}[3]{%
+  \ttfamily\small #1 & %
+  \centering\parbox[c][2.2em][c]{0.8\linewidth}{\centering\ttfamily\bfseries\colorbox{riscBackground}{\strut #2}} & %
+  \ttfamily\small\textcolor{riscComment}{#3} \\ \hline
+}
+
+%
+\newenvironment{riscvstack}[1][Mapa de Memoria]{%
+    \risctitle{#1}\par\noindent\ttfamily%
+    \tabularx{\linewidth}{|p{2.2cm}|C|p{3.2cm}|}
+    \hline
+    \textit{Dirección} & \textit{Contenido (32-bit)} & \textit{Etiqueta} \\ \hline
+}{%
+    \endtabularx\vspace{1em}\par%
+}
+
+\newcommand{\riscvsp}{\ensuremath{\leftarrow} \textbf{sp}}
+
+%%%%%%%%%%%% LOGO RiScVTeX %%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\RiScVTeX}{%
+  R%
+  \kern-.08em\raisebox{-.3ex}{i}%  
+  \kern-.05em\raisebox{.5ex}{S}%   
+  \kern-.05em\raisebox{-.2ex}{c}%   
+  \kern-.05em\raisebox{.6ex}{V}%    
+  \kern-.15em\raisebox{-.4ex}{T}%  
+  \kern-.15em\raisebox{.4ex}{e}%    
+  \kern-.1em X%                    
+  \xspace%
+}
+
+%%%%%%%%%%%%%%%%%%%% AVISOS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\riscwarn}[1]{%
+  \vspace{0.5em}\noindent
+  \fboxsep=5pt\colorbox{riscRegister!10}{%
+    \parbox{\dimexpr\linewidth-2\fboxsep}{%
+      \small\textbf{\textcolor{riscRegister}{[!] HAZARD:}} #1
+    }%
+  }\vspace{0.5em}
+}
+
+%%%%%%%%%%%%%%%%%%% REGISTROS %%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\reg}[1]{\textcolor{riscRegister}{\texttt{#1}}\xspace}
+
+%%%%%%%%%%%%%%%% RANGOS DE BITS %%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\bits}[1]{%
+  \unskip\kern.2em%
+  \colorbox{black}{%
+    \color{white}\bfseries\sffamily [#1]%
+  }\xspace%
+}
+
+%%%%%%%%%%% PIPELINE %%%%%%%%%%%%%%%%%%%%
+\newcommand{\riscvstep}{%
+  \ensuremath{\;\color{riscPink}\Rightarrow\;}\xspace%
+}
+\endinput
