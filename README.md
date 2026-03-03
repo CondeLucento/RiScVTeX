@@ -57,6 +57,9 @@
     \riscvmem{0x7ffffff8}{0x00400560}{Retorno ra \riscvsp}%
 \end{riscvstack}
 ```
+<div align="center">
+  <img src="RiScVTeX_Foto.png" alt="Ejemplo de un documento con RiScVTeX / Example of a RiScVTeX document" width="550">
+</div>
 
 ## Instalación / Installation
 Copia el archivo RiScVTeX.sty en la carpeta de tu proyecto.
