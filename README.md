@@ -63,6 +63,7 @@
 ```
 <div align="center">
   <img src="RiScVTeX_Foto.png" alt="Ejemplo de un documento con RiScVTeX / Example of a RiScVTeX document" width="550">
+  <img src="RiScVTeX_Example2.png" alt="" width="550">
 </div>
 
 ## Instalación / Installation
